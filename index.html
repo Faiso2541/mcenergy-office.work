@@ -21,7 +21,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=Chakra+Petch:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=Chakra+Petch:ital,wght@0,600;0,700;1,700&display=swap" rel="stylesheet">
 <style>
 :root{
     --navy:#16264A;
@@ -1917,6 +1917,57 @@
      display:flex ข้างบนเป็นสไตล์ของหน้าเว็บ ซึ่งชนะ hidden ที่เป็นค่าของเบราว์เซอร์
      ถ้าไม่มีบรรทัดนี้ ม่านจะกางค้างทับทั้งหน้าตลอดเวลา กดอะไรไม่ได้เลย */
   .bk-scr[hidden]{display:none;}
+
+  /* ---- หน้าเปิดแอป ----
+     ขึ้นเฉพาะตอนเปิดแอปเข้ามาใหม่ ค้างสองวินาทีแล้วจางไปเอง
+     แตะจอข้ามได้ทันที เพราะช่างเปิดแอปวันละหลายรอบ ไม่ควรต้องรอทุกครั้ง
+     ตอนกลับมาจากหน้ารายงานจะไม่ขึ้น เพราะนั่นไม่ใช่การเปิดแอปใหม่ */
+  .sp-scr{
+    position:fixed;inset:0;z-index:9999;background:var(--navy);
+    display:flex;align-items:center;justify-content:center;
+    padding-top:env(safe-area-inset-top,0px);
+    opacity:1;transition:opacity .34s ease;
+  }
+  .sp-scr[hidden]{display:none;}
+  .sp-scr.off{opacity:0;pointer-events:none;}
+  .sp-mid{display:flex;flex-direction:column;align-items:center;}
+  .sp-apx{
+    font-family:'Chakra Petch',sans-serif;font-weight:700;font-style:italic;
+    font-size:56px;line-height:1;color:#fff;letter-spacing:-1.5px;
+  }
+  .sp-apx span{display:inline-block;opacity:0;}
+  /* ตัวเอกซ์สีแดงเป็นจุดเน้นเดียวของทั้งจอ จึงไม่ใส่สีอื่นมาแย่ง */
+  .sp-x{color:#EF3E36;}
+  @keyframes spLetter{
+    from{ opacity:0;transform:translateX(46px) skewX(-12deg); }
+    to  { opacity:1;transform:translateX(0) skewX(0); }
+  }
+  .sp-scr .a1{animation:spLetter .34s cubic-bezier(.2,.8,.3,1) .05s both;}
+  .sp-scr .a2{animation:spLetter .34s cubic-bezier(.2,.8,.3,1) .16s both;}
+  .sp-scr .a3{animation:spLetter .34s cubic-bezier(.2,.8,.3,1) .27s both;}
+  .sp-rule{
+    height:3px;width:0;background:#F5C518;margin:9px 0 7px;
+    animation:spRule .3s ease .62s both;
+  }
+  @keyframes spRule{ from{width:0;} to{width:116px;} }
+  .sp-ow{
+    font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:13px;
+    color:#F5C518;letter-spacing:5px;text-transform:uppercase;
+    animation:spFade .3s ease .8s both;
+  }
+  /* บรรทัดผู้จัดทำเกาะขอบล่าง ไม่ให้ไปเบียดกลุ่มชื่อแอป */
+  .sp-by{
+    position:absolute;left:0;right:0;bottom:calc(22px + env(safe-area-inset-bottom,0px));
+    text-align:center;font-size:9px;letter-spacing:.5px;
+    color:rgba(255,255,255,.38);
+    animation:spFade .34s ease 1s both;
+  }
+  @keyframes spFade{ from{opacity:0;} to{opacity:1;} }
+  @media (prefers-reduced-motion:reduce){
+    .sp-scr,.sp-scr span,.sp-rule,.sp-ow,.sp-by{animation:none;transition:none;}
+    .sp-apx span{opacity:1;}
+    .sp-rule{width:116px;}
+  }
   .bk-scr.off{opacity:0;pointer-events:none;}
   .bk-mid{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px 18px;}
   .bk-art{position:relative;width:112px;height:112px;}
@@ -1947,21 +1998,56 @@
     <div class="bk-tail">เก็บฉบับร่างไว้ให้แล้ว</div>
   </div>
 </div>
+<!-- ============ หน้าเปิดแอป ============
+     ต้องอยู่บนสุดเช่นกัน จะได้ขึ้นตั้งแต่เฟรมแรก ไม่เห็นหน้าล็อกอินแวบก่อน -->
+<div class="sp-scr" id="splashScr" aria-hidden="true" hidden>
+  <div class="sp-mid">
+    <div class="sp-apx"><span class="a1">A</span><span class="a2">P</span><span class="a3 sp-x">X</span></div>
+    <div class="sp-rule"></div>
+    <div class="sp-ow">Office Work</div>
+  </div>
+  <div class="sp-by">By McEnergy Evolution</div>
+</div>
 <script>
-/* ธงถูกตั้งโดยหน้ารายงานตอนกดยืนยันออก ใช้ครั้งเดียวแล้วลบทิ้งทันที
-   เข้าแอปตามปกติหรือกดรีเฟรชจะไม่มีธง ม่านจึงไม่ขึ้นมาคั่น */
+/* ตัดสินใจตั้งแต่ตอนอ่านโค้ด ไม่ใช่รอโค้ดบูตท้ายไฟล์
+   ไม่งั้นหน้าล็อกอินจะแวบขึ้นมาก่อนแล้วค่อยมีจออื่นมาปิด ซึ่งเห็นเป็นการกระตุก
+
+   ธง pgFrom ถูกตั้งโดยหน้ารายงานตอนกดยืนยันออก ใช้ครั้งเดียวแล้วลบทิ้งทันที
+   มีธง  = กลับมาจากหน้ารายงาน ขึ้นม่านคั่นให้ภาพต่อกัน ไม่ต้องขึ้นหน้าเปิดแอป
+   ไม่มี = เปิดแอปเข้ามาใหม่ ขึ้นหน้าเปิดแอปสองวินาที */
 (function(){
   var from = null;
   try{
     from = sessionStorage.getItem('pgFrom');
     sessionStorage.removeItem('pgFrom');
   }catch(e){}
-  if(from !== 'report') return;
-  var scr = document.getElementById('backScr');
-  if(!scr) return;
-  scr.hidden = false;
-  setTimeout(function(){ scr.classList.add('off'); }, 200);
-  setTimeout(function(){ scr.hidden = true; }, 600);
+
+  if(from === 'report'){
+    var back = document.getElementById('backScr');
+    if(!back) return;
+    back.hidden = false;
+    setTimeout(function(){ back.classList.add('off'); }, 200);
+    setTimeout(function(){ back.hidden = true; }, 600);
+    return;
+  }
+
+  var sp = document.getElementById('splashScr');
+  if(!sp) return;
+  sp.hidden = false;
+
+  var closeT = null, killT = null, done = false;
+  function close(){
+    if(done) return;
+    done = true;
+    clearTimeout(closeT); clearTimeout(killT);
+    sp.classList.add('off');
+    setTimeout(function(){ sp.hidden = true; }, 380);
+  }
+  /* แตะที่ไหนก็ข้ามได้ ไม่ต้องเล็งปุ่ม */
+  sp.addEventListener('click', close);
+  closeT = setTimeout(close, 2000);
+  /* กันเหนียว ถ้าจังหวะไหนพลาดไป จอนี้ต้องหายไปเองเสมอ ห้ามค้างทับแอป */
+  killT  = setTimeout(function(){ sp.classList.add('off'); sp.hidden = true; }, 4000);
 })();
 </script>
 
