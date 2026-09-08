@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -84,7 +85,21 @@
     color:var(--navy);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
   }
   .tb-back:hover{background:var(--lav-bg);}
-  .tb-spacer{flex:1;}
+  /* กลุ่มปุ่มฝั่งขวา : ดูตัวอย่าง + เพิ่มเติม
+     ของเดิมใช้ตัวคั่นยืดหยุ่นดันไปทางขวา ซึ่งได้ผลเฉพาะตอนทุกอย่างอยู่แถวเดียวกัน
+     พอข้อความสถานะยาวขึ้นจนแถบตกบรรทัด ตัวคั่นจะไปอยู่คนละบรรทัดกับปุ่ม
+     ปุ่มเลยลอยไปกลางแถว จับสองปุ่มมาไว้ในกล่องเดียวแล้วดันขวาทั้งกล่อง
+     ไม่ว่าจะตกบรรทัดหรือไม่ ก็ชิดขวาเสมอ */
+  .tb-right{
+    margin-left:auto;display:flex;align-items:center;gap:8px;
+    flex:0 0 auto;white-space:nowrap;
+  }
+  /* ข้อความสถานะยาวได้ แต่ต้องยอมหดและตัดท้ายด้วยจุดไข่ปลา
+     ไม่งั้นมันจะดันปุ่มให้ตกบรรทัดตั้งแต่แรก */
+  .status-chip{
+    min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    max-width:38vw;
+  }
 
   /* ---- เมนู ⋯ บนแถบด้านบน ---- */
   .tb-more{position:relative;display:inline-flex;}
@@ -107,6 +122,9 @@
     .tb-dots .lbl{display:none;}
   }
   .tb-menu{
+    /* กล่องขวาตั้ง nowrap ไว้กันปุ่มตกบรรทัด แต่ในเมนูต้องขึ้นบรรทัดได้ตามปกติ
+       ไม่งั้นข้อความยาว ๆ อย่าง "บันทึกสถานะล่าสุด" จะล้นออกนอกกล่อง */
+    white-space:normal;
     position:absolute;right:0;top:calc(100% + 7px);z-index:60;width:224px;
     background:#fff;border:1px solid var(--line);border-radius:11px;padding:7px;
     box-shadow:0 12px 30px rgba(22,38,74,.18);
@@ -1589,7 +1607,7 @@
         กลับหน้าเมนู
       </button>
       <span class="status-chip" id="statusChip">ฉบับร่างใหม่</span>
-      <span class="tb-spacer"></span>
+      <span class="tb-right">
       <button class="btn btn-preview" id="previewBtn" type="button">ดูตัวอย่าง</button>
 
       <span class="tb-more">
@@ -1618,6 +1636,7 @@
           <button class="btn tb-item btn-install" id="installBtn" type="button" style="display:none;">ติดตั้งแอป</button>
           <button class="btn tb-item tb-danger" id="clearBtn" type="button">ล้างฟอร์ม</button>
         </div>
+      </span>
       </span>
 
       <!-- สามปุ่มนี้ย้ายไปอยู่ในหน้าดูตัวอย่างแล้ว เพื่อบังคับให้ช่างตรวจงานก่อนส่ง
@@ -5647,6 +5666,20 @@
   var pvFit = null;      /* re-layout function for the current preview */
   var pvFull = false;    /* false = shrink to fit the screen, true = 1:1 */
 
+  /* คลาสของ body ที่จะใช้ในหน้าตัวอย่างและไฟล์ PDF
+     ต้องถอดคลาสย่อขยายหน้าจอออกเสมอ เพราะการย่อเป็นเรื่องของการมองบนจอเท่านั้น
+     ถ้าติดไปด้วย กระดาษจะถูกย่อตามไปทั้งใบ ขนาดที่พิมพ์ออกมาจะผิด
+
+     จุดนี้เคยพลาดมาแล้ว ตอนนั้นถอดคลาสออกจาก "สำเนา" ของ body
+     แต่ตอนประกอบหน้าใส่กรอบตัวอย่าง ดันไปอ่านคลาสจาก body ตัวเป็น ๆ ที่ยังมีคลาสอยู่
+     ค่าย่อจึงยังหลุดไปถึงไฟล์ PDF ตอนนี้ให้ทั้งสองที่เรียกฟังก์ชันเดียวกัน */
+  function pvBodyClass(){
+    return (document.body.className || '')
+      .replace(/\bzm-[a-z0-9]+\b/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function openPreview(){
     if(!readyGuard()) return;
     preparePrint();
@@ -5655,9 +5688,7 @@
 
     getPrintCss().then(function(css){
       var body = document.body.cloneNode(true);
-      /* การย่อขยายเป็นเรื่องของการมองบนจอเท่านั้น
-         ห้ามติดไปกับตัวอย่างหรือไฟล์ PDF ไม่งั้นกระดาษจะผิดขนาด */
-      body.className = body.className.replace(/\bzm-[a-z0-9]+\b/g, '').replace(/\s+/g, ' ').trim();
+      body.className = pvBodyClass();
 
       /* Carry the live values across; cloneNode does not copy what the user
          typed. The clone is still an exact copy of the live body at this
@@ -5963,7 +5994,7 @@
           '.exporting .cover-page,.exporting .card,.exporting .pv-sheet{' +
             'box-shadow:none !important;margin:0 !important;width:210mm !important;}' +
           '.exporting .pv-sheet > .card{width:auto !important;}' +
-        '</style></head><body class="' + (document.body.className || '') + '">' +
+        '</style></head><body class="' + pvBodyClass() + '">' +
         body.innerHTML + '</body></html>';
 
       var d = frame.contentWindow.document;
