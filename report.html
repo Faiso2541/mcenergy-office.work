@@ -141,46 +141,6 @@
   .tb-danger{color:var(--danger);}
   .tb-hint{font-size:10.5px;color:var(--ink-faint);padding:5px 8px 2px;line-height:1.45;}
 
-  /* ---- ขนาดฟอร์ม เล็ก / กลาง / ใหญ่ ---- */
-  .tb-zoom{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:2px 0 0;}
-  .tb-zoom button{
-    flex:1;border:none;background:#fff;padding:8px 0;font-size:12.5px;font-family:inherit;
-    color:var(--ink-soft);cursor:pointer;border-right:1px solid var(--line);
-  }
-  .tb-zoom button:last-child{border-right:none;}
-  .tb-zoom button.on{background:var(--navy);color:#fff;font-weight:700;}
-
-  /* ย่อขยายเฉพาะตัวฟอร์ม ไม่แตะแถบบนและหน้าตัวอย่าง
-     และต้องไม่ติดไปกับไฟล์ PDF จึงถอดคลาสออกตอนสร้างสำเนาไปทำตัวอย่าง */
-  body.zm-sm .wrap{zoom:.72;}
-  body.zm-md .wrap{zoom:.86;}
-  /* ใหญ่ = ขนาดเดิมของฟอร์มเป๊ะ ๆ
-     เขียนไว้ชัดเจนแทนการอาศัยว่า "ไม่มีคลาส" เพราะถ้ามีคลาสเก่าค้างอยู่
-     จากรุ่นที่ยังใช้ 5 ระดับ ขนาดจะเพี้ยนโดยไม่มีใครรู้ */
-  body.zm-lg .wrap{zoom:1;}
-
-  /* ---- ทางสำรองสำหรับเบราว์เซอร์ที่ไม่รู้จัก zoom ----
-     zoom ใช้ได้ทั้ง Safari บน iOS และ Chrome บน Android ซึ่งเป็นสองตัวที่ช่างใช้จริง
-     แต่เป็นคุณสมบัติที่ไม่ได้อยู่ในมาตรฐานกลาง เบราว์เซอร์เก่าบางตัวไม่รู้จัก
-     ตรงนี้จึงเตรียม transform ไว้แทน ต้องขยายความกว้างชดเชยด้วย
-     ไม่งั้นเนื้อหาจะย่อแล้วเหลือพื้นที่ว่างด้านขวา ไม่เต็มจอ */
-  @supports not (zoom: 1){
-    body.zm-sm .wrap{
-      transform:scale(.72);transform-origin:top left;width:138.9%;
-    }
-    body.zm-md .wrap{
-      transform:scale(.86);transform-origin:top left;width:116.3%;
-    }
-    body.zm-lg .wrap{transform:none;width:auto;}
-  }
-
-  /* โหมดเล็กต้องบังคับให้รูปเรียงสองใบซ้ายขวา
-     เพราะกฎจอมือถือด้านล่างยุบให้เหลือคอลัมน์เดียว และการย่อไม่มีผลกับกฎนั้น
-     กฎขนาดจอดูจากจอจริง ไม่สนว่าเนื้อหาถูกย่อลงเท่าไร จึงต้องสั่งทับตรงนี้ */
-  @media screen and (max-width:640px){
-    body.zm-sm .photo-grid{grid-template-columns:1fr 1fr;}
-  }
-
 :root{
     --navy:#16264A;
     --navy-soft:#2A3D66;
@@ -505,6 +465,33 @@
     line-height:1.6;white-space:pre-line;
   }
   .alert-acts{display:flex;gap:9px;}
+
+  /* ---- กล่องยืนยันตอนออกจากหน้ารายงาน ----
+     ของเดิมใช้กล่องมาตรฐานของเบราว์เซอร์ ซึ่งขึ้นหัวว่า "This page says"
+     ดูไม่เป็นส่วนหนึ่งของแอป และปุ่ม OK/Cancel ก็เป็นภาษาอังกฤษ
+     ทำเป็นกล่องของเราเองให้เข้าชุดกับกล่องแจ้งเตือนอื่น ๆ */
+  .lv-icon{
+    width:38px;height:38px;border-radius:10px;background:#EAF0FB;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;color:var(--b, #12409B);
+  }
+  .lv-detail{
+    font-size:13.5px;color:var(--ink-soft);line-height:1.65;margin:0 0 18px;
+  }
+  .lv-detail b{color:var(--ink);font-weight:700;}
+  /* อยู่ต่อ = ทางที่ปลอดภัย ใช้สีฟ้า และวางไว้ซ้ายให้กดง่ายกว่า */
+  .lv-stay{
+    flex:1;background:#1D6FD6;border:none;color:#fff;
+    border-radius:9px;padding:11px;font-size:14px;font-weight:700;
+    font-family:inherit;cursor:pointer;
+  }
+  .lv-stay:hover{background:#1760BC;}
+  /* ยืนยันออก = ทางที่เสียของ ใช้สีแดงเตือน */
+  .lv-go{
+    flex:1;background:var(--danger);border:none;color:#fff;
+    border-radius:9px;padding:11px;font-size:14px;font-weight:700;
+    font-family:inherit;cursor:pointer;
+  }
+  .lv-go:hover{background:#A83A3A;}
   .alert-acts .alert-close{
     flex:0 0 auto;background:var(--paper);border:1px solid var(--line);color:var(--ink-soft);
     border-radius:9px;padding:10px 16px;font-size:14px;font-weight:600;
@@ -1617,14 +1604,6 @@
         </button>
 
         <div class="tb-menu" id="tbMenu" hidden>
-          <div class="tb-sec">ขนาดฟอร์ม</div>
-          <div class="tb-zoom" id="zoomBtns">
-            <button type="button" data-z="sm">เล็ก</button>
-            <button type="button" data-z="md">กลาง</button>
-            <button type="button" data-z="lg" class="on">ใหญ่</button>
-          </div>
-          <div class="tb-hint" id="zoomHint">เล็ก = เห็นรูปสองใบเรียงซ้ายขวา</div>
-
           <div class="tb-sec">ฉบับร่าง</div>
           <button class="btn tb-item" id="saveFileBtn" type="button">เก็บงานไว้ทำต่อ</button>
           <button class="btn tb-item" id="openFileBtn" type="button">เปิดงานที่ค้าง</button>
@@ -2039,6 +2018,28 @@
     </div>
     <button type="button" class="btn btn-primary" id="empDone" style="width:100%;justify-content:center;">เสร็จสิ้น</button>
     <button type="button" class="modal-close" id="empClear">ล้างชื่อที่เลือกทั้งหมด</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="leaveModal" style="display:none;">
+  <div class="alert-box" role="alertdialog" aria-labelledby="leaveTitle" aria-describedby="leaveDetail">
+    <div class="alert-top">
+      <div class="lv-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+      <div>
+        <p class="alert-eyebrow">ออกจากหน้ารายงาน</p>
+        <p class="alert-title" id="leaveTitle">ต้องการกลับไปหน้าเมนูใช่ไหม</p>
+      </div>
+    </div>
+    <p class="lv-detail" id="leaveDetail">
+      สิ่งที่กรอกไว้จะถูกเก็บเป็นฉบับร่างโดยอัตโนมัติ
+      กลับเข้ามาทำต่อได้ทุกเมื่อ แต่<b>รูปภาพและลายเซ็นจะไม่ถูกเก็บ</b> ต้องใส่ใหม่
+    </p>
+    <div class="alert-acts">
+      <button type="button" class="lv-stay" id="leaveStay">อยู่ต่อ</button>
+      <button type="button" class="lv-go" id="leaveGo">ยืนยันออก</button>
+    </div>
   </div>
 </div>
 
@@ -2583,9 +2584,26 @@
   (function(){
     var b = document.getElementById('backHub');
     if(!b) return;
-    b.addEventListener('click', function(){
-      if(!confirm('กลับไปหน้าเมนูใช่ไหม\n\nสิ่งที่กรอกไว้จะถูกเก็บเป็นฉบับร่าง กลับเข้ามาทำต่อได้')) return;
-      location.href = 'index.html';
+    var box  = document.getElementById('leaveModal');
+    var stay = document.getElementById('leaveStay');
+    var go   = document.getElementById('leaveGo');
+
+    function openLeave(){
+      if(!box){ location.href = 'index.html'; return; }
+      try{ saveDraft(true); }catch(e){}      /* เก็บร่างก่อนถาม จะได้ไม่หายแน่นอน */
+      box.style.display = 'flex';
+      if(stay) stay.focus();
+    }
+    function closeLeave(){ if(box) box.style.display = 'none'; }
+
+    b.addEventListener('click', openLeave);
+    if(stay) stay.addEventListener('click', closeLeave);
+    if(go)   go.addEventListener('click', function(){ location.href = 'index.html'; });
+    if(box)  box.addEventListener('click', function(e){
+      if(e.target === box){ closeLeave(); }   /* แตะพื้นที่มืดรอบ ๆ = อยู่ต่อ */
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && box && box.style.display === 'flex'){ closeLeave(); }
     });
   })();
 
@@ -2611,49 +2629,6 @@
     });
     document.addEventListener('click', close);
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ close(); } });
-  })();
-
-  /* ---- ขนาดฟอร์ม เล็ก / กลาง / ใหญ่ ----
-     เล็กมีไว้ให้เห็นรูปสองใบเรียงซ้ายขวาบนมือถือ
-     จำค่าที่เลือกไว้ ครั้งหน้าเปิดมาได้ขนาดเดิม */
-  (function(){
-    var KEY = 'mce_form_zoom_v2';
-    var wrap = document.getElementById('zoomBtns');
-    if(!wrap) return;
-
-    var HINT = {
-      sm: 'เล็ก = เห็นรูปสองใบเรียงซ้ายขวา',
-      md: 'กลาง = อ่านง่ายขึ้น เห็นเนื้อหามากกว่าปกติ',
-      lg: 'ใหญ่ = ขนาดปกติ ตัวหนังสือชัดที่สุด'
-    };
-
-    function apply(z){
-      /* ล้างคลาสขนาดทุกตัวก่อน รวมของรุ่นเก่าที่เคยใช้ตัวเลข 80-125
-         ถ้าไม่ล้าง เครื่องที่เคยตั้งค่าไว้จะเหลือคลาสค้างและขนาดไม่ตรง */
-      document.body.className = document.body.className
-        .replace(/\bzm-[a-z0-9]+\b/g, '').replace(/\s+/g, ' ').trim();
-      document.body.classList.add('zm-' + z);
-      var all = wrap.querySelectorAll('button');
-      for(var i = 0; i < all.length; i++){
-        all[i].classList.toggle('on', all[i].getAttribute('data-z') === z);
-      }
-      var hint = document.getElementById('zoomHint');
-      if(hint){ hint.textContent = HINT[z] || ''; }
-      try{ localStorage.setItem(KEY, z); }catch(e){}
-    }
-
-    wrap.addEventListener('click', function(e){
-      var b = e.target.closest ? e.target.closest('button[data-z]') : null;
-      if(!b) return;
-      apply(b.getAttribute('data-z'));
-    });
-
-    var saved = 'lg';
-    try{
-      var v = localStorage.getItem(KEY);
-      if(['sm','md','lg'].indexOf(v) !== -1){ saved = v; }
-    }catch(e){}
-    apply(saved);
   })();
 
   /* ปุ่มของกล่องบันทึกปัญหา ผูกแบบกันพลาด ถ้าไม่มีปุ่มก็ข้ามไปเฉย ๆ */
@@ -5666,20 +5641,6 @@
   var pvFit = null;      /* re-layout function for the current preview */
   var pvFull = false;    /* false = shrink to fit the screen, true = 1:1 */
 
-  /* คลาสของ body ที่จะใช้ในหน้าตัวอย่างและไฟล์ PDF
-     ต้องถอดคลาสย่อขยายหน้าจอออกเสมอ เพราะการย่อเป็นเรื่องของการมองบนจอเท่านั้น
-     ถ้าติดไปด้วย กระดาษจะถูกย่อตามไปทั้งใบ ขนาดที่พิมพ์ออกมาจะผิด
-
-     จุดนี้เคยพลาดมาแล้ว ตอนนั้นถอดคลาสออกจาก "สำเนา" ของ body
-     แต่ตอนประกอบหน้าใส่กรอบตัวอย่าง ดันไปอ่านคลาสจาก body ตัวเป็น ๆ ที่ยังมีคลาสอยู่
-     ค่าย่อจึงยังหลุดไปถึงไฟล์ PDF ตอนนี้ให้ทั้งสองที่เรียกฟังก์ชันเดียวกัน */
-  function pvBodyClass(){
-    return (document.body.className || '')
-      .replace(/\bzm-[a-z0-9]+\b/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
-
   function openPreview(){
     if(!readyGuard()) return;
     preparePrint();
@@ -5688,7 +5649,6 @@
 
     getPrintCss().then(function(css){
       var body = document.body.cloneNode(true);
-      body.className = pvBodyClass();
 
       /* Carry the live values across; cloneNode does not copy what the user
          typed. The clone is still an exact copy of the live body at this
@@ -5994,7 +5954,7 @@
           '.exporting .cover-page,.exporting .card,.exporting .pv-sheet{' +
             'box-shadow:none !important;margin:0 !important;width:210mm !important;}' +
           '.exporting .pv-sheet > .card{width:auto !important;}' +
-        '</style></head><body class="' + pvBodyClass() + '">' +
+        '</style></head><body class="' + (document.body.className || '') + '">' +
         body.innerHTML + '</body></html>';
 
       var d = frame.contentWindow.document;
