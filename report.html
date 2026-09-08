@@ -1593,6 +1593,11 @@
     padding-top:env(safe-area-inset-top,0px);
     opacity:0;transition:opacity .2s ease;
   }
+  /* ต้องเขียนบรรทัดนี้ไว้ด้วยเสมอ ห้ามลบ
+     display:flex ข้างบนเป็นสไตล์ของหน้าเว็บ ซึ่งชนะ hidden ที่เป็นค่าของเบราว์เซอร์
+     ถ้าไม่มีบรรทัดนี้ ม่านจะกางค้างทับทั้งหน้า มองไม่เห็นเพราะโปร่งใส
+     แต่จะดักการกดทั้งหมดไว้ กดปุ่มอะไรในฟอร์มไม่ได้สักปุ่ม */
+  .bk-scr[hidden]{display:none;}
   .bk-scr.on{opacity:1;}
   .bk-mid{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px 18px;}
   /* ต้องมีระยะมองสามมิติที่ตัวแม่ ไม่งั้น rotateY จะแบนจนดูเหมือนแค่ย่อส่วนเฉย ๆ */
