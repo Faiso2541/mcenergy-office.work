@@ -1902,6 +1902,20 @@
     .lh-cell:last-child{border-bottom:none;}
   }
 
+  /* ---- อนิเมชันย้ายหน้า แบบ A · ครึ่งขาเข้า ----
+     ต่อจากหน้ารายงานที่เลื่อนออกทางขวา หน้านี้เลื่อนเข้ามาจากทางซ้าย
+     เล่นเฉพาะตอนกลับมาจากหน้ารายงานเท่านั้น เข้าแอปตามปกติจะไม่ขยับ */
+  @keyframes pgInLeft{
+    from{ transform:translateX(-24%); }
+    to  { transform:translateX(0); }
+  }
+  body.pg-entering .scr.on{
+    animation:pgInLeft .34s cubic-bezier(.4,0,.2,1) both;
+  }
+  @media (prefers-reduced-motion:reduce){
+    body.pg-entering .scr.on{ animation:none; }
+  }
+
 </style>
 </head>
 <body>
@@ -9044,6 +9058,21 @@
   /* ประตูเข้าใช้งานต้องขึ้นเสมอ ต่อให้ขั้นตอนก่อนหน้าพัง
      ไม่งั้นฟอร์มจะโผล่มาทั้งที่ยังไม่ได้ล็อกอิน */
   try{ bootAuth(); }catch(e){ console.error('bootAuth', e); showScreen('auth'); }
+
+  /* ---- อนิเมชันย้ายหน้า แบบ A · ครึ่งขาเข้า ----
+     หน้ารายงานตั้งธงไว้ก่อนเปลี่ยนหน้า ธงนี้ใช้ครั้งเดียวแล้วลบทิ้งทันที
+     ต้องเรียกหลัง bootAuth เพราะตอนนั้นหน้าที่จะโชว์ถึงจะมีคลาส on แล้ว
+     ถอดคลาสออกเมื่อเล่นจบ จะได้ไม่มี transform ค้างไว้บนหน้าจอ */
+  (function(){
+    var from = null;
+    try{
+      from = sessionStorage.getItem('pgFrom');
+      sessionStorage.removeItem('pgFrom');
+    }catch(e){}
+    if(from !== 'report') return;
+    document.body.classList.add('pg-entering');
+    setTimeout(function(){ document.body.classList.remove('pg-entering'); }, 460);
+  })();
 })();
 
 </script>
