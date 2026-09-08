@@ -94,11 +94,41 @@
     margin-left:auto;display:flex;align-items:center;gap:8px;
     flex:0 0 auto;white-space:nowrap;
   }
-  /* ข้อความสถานะยาวได้ แต่ต้องยอมหดและตัดท้ายด้วยจุดไข่ปลา
-     ไม่งั้นมันจะดันปุ่มให้ตกบรรทัดตั้งแต่แรก */
+  /* ---- แถบแจ้งสถานะ ----
+     ของเดิมเป็นข้อความค้างอยู่บนแถบเครื่องมือ ซึ่งกินที่และเบียดปุ่มจนตกบรรทัด
+     ย้ายมาเป็นแถบเด้งใต้แถบเครื่องมือ ขึ้นเฉพาะตอนมีเรื่องแจ้งแล้วจางหายเอง
+     วางแบบลอยทับเนื้อหา ไม่ดันหน้าให้ขยับ ตำแหน่งอ่านจาก .topbar ที่เป็น sticky
+     จึงเลื่อนตามแถบเครื่องมือไปด้วยเสมอ */
+  .st-bar{
+    position:absolute;left:0;right:0;top:100%;z-index:45;
+    padding:0 20px;pointer-events:none;
+  }
+  .st-inner{
+    max-width:900px;margin:0 auto;
+    display:flex;align-items:center;gap:9px;
+    background:var(--navy);color:#fff;
+    border-radius:0 0 12px 12px;padding:10px 14px;
+    box-shadow:0 12px 26px rgba(22,38,74,.24);
+    font-size:12.5px;font-weight:600;line-height:1.35;
+    pointer-events:auto;
+    animation:stIn .22s ease both;
+  }
+  .st-bar.out .st-inner{animation:stOut .22s ease both;}
+  @keyframes stIn { from{opacity:0;transform:translateY(-12px);} to{opacity:1;transform:none;} }
+  @keyframes stOut{ from{opacity:1;transform:none;} to{opacity:0;transform:translateY(-12px);} }
+  .st-ic{flex:0 0 auto;display:inline-flex;opacity:.9;}
+  /* ข้อความยาวได้เต็มแถบ ขึ้นได้ถึงสองบรรทัดแล้วค่อยตัดท้าย */
   .status-chip{
-    min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    max-width:38vw;
+    flex:1 1 auto;min-width:0;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .st-x{
+    flex:0 0 auto;background:none;border:none;color:rgba(255,255,255,.68);
+    font-size:18px;line-height:1;padding:2px 3px;cursor:pointer;font-family:inherit;
+  }
+  .st-x:hover{color:#fff;}
+  @media (prefers-reduced-motion:reduce){
+    .st-inner,.st-bar.out .st-inner{animation:none;}
   }
 
   /* ---- เมนู ⋯ บนแถบด้านบน ---- */
@@ -217,7 +247,6 @@
   .btn-pink:disabled{opacity:.6;}
   .btn-ghost{background:transparent;border-color:transparent;color:var(--ink-soft);}
   .btn-ghost:hover{color:var(--danger);}
-  .status-chip{font-size:11px;color:var(--ink-faint);align-self:center;}
 
   /* ---- letterhead ---- */
   .letterhead{
@@ -1545,12 +1574,25 @@
     .topbar-inner{padding:10px 14px;gap:8px;}
     .actions{gap:6px;}
     .actions .btn{padding:8px 10px;font-size:12px;}
-    .status-chip{width:100%;order:-1;}
+    .st-bar{padding:0 10px;}
     .grid,.grid.g3,.photo-grid{grid-template-columns:1fr;}
     .log-grid,.log-foot{grid-template-columns:1fr;}
     .lh-top{grid-template-columns:1fr;}
     .lh-cell{border-right:none;border-bottom:1px solid var(--line);}
     .lh-cell:last-child{border-bottom:none;}
+  }
+
+  /* ---- อนิเมชันย้ายหน้า แบบ A · ครึ่งขาออก ----
+     กดยืนยันออก หน้ารายงานทั้งหน้าเลื่อนออกไปทางขวา
+     แล้วค่อยเปลี่ยนไป index.html ซึ่งจะเลื่อนเข้าจากทางซ้ายรับต่อ
+     ใส่ overflow:hidden ที่ html กันแถบเลื่อนแนวนอนโผล่ตอนหน้ากำลังเลื่อน */
+  body.pg-leaving{
+    transform:translateX(100%);
+    transition:transform .34s cubic-bezier(.4,0,.2,1);
+  }
+  html.pg-leaving{ overflow:hidden; }
+  @media (prefers-reduced-motion:reduce){
+    body.pg-leaving{ transition:none;transform:none; }
   }
 
 </style>
@@ -1593,7 +1635,6 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
         กลับหน้าเมนู
       </button>
-      <span class="status-chip" id="statusChip">ฉบับร่างใหม่</span>
       <span class="tb-right">
       <button class="btn btn-preview" id="previewBtn" type="button">ดูตัวอย่าง</button>
 
@@ -1624,6 +1665,19 @@
       <button class="btn btn-pink is-moved" id="sendReportBtn" type="button" title="สร้าง PDF แล้วอัปขึ้นโฟลเดอร์ Google Drive ส่วนกลางอัตโนมัติ">ส่ง Report</button>
       <button class="btn is-moved" id="printBtn" type="button" title="สั่งพิมพ์ด้วยระบบของเบราว์เซอร์ ได้ตัวหนังสือคมชัดที่สุด">พิมพ์</button>
       <input type="file" id="openFileInput" accept="application/json,.json" style="display:none;">
+    </div>
+  </div>
+
+  <!-- ============ แถบแจ้งสถานะ ============
+       อยู่ในแถบเครื่องมือแต่เป็นคนละแถว จึงเลื่อนติดตามหัวไปด้วย
+       ปกติซ่อนอยู่ เด้งขึ้นเมื่อข้อความในนี้ถูกเปลี่ยน แล้วจางหายเองใน 4.5 วิ -->
+  <div class="st-bar" id="statusBar" role="status" aria-live="polite" hidden>
+    <div class="st-inner">
+      <span class="st-ic" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+      </span>
+      <span class="status-chip" id="statusChip">ฉบับร่างใหม่</span>
+      <button type="button" class="st-x" id="statusX" aria-label="ปิดข้อความ">&#215;</button>
     </div>
   </div>
 </div>
@@ -2598,13 +2652,69 @@
 
     b.addEventListener('click', openLeave);
     if(stay) stay.addEventListener('click', closeLeave);
-    if(go)   go.addEventListener('click', function(){ location.href = 'index.html'; });
+    /* ยืนยันออก: เลื่อนหน้าออกทางขวาก่อน แล้วค่อยเปลี่ยนหน้า
+       ธง pgFrom บอกหน้าเมนูให้เล่นครึ่งขาเข้าต่อ เข้าแอปตามปกติจะไม่มีธงนี้
+       ตัวจับเวลาเป็นตัวสั่งเปลี่ยนหน้าเสมอ ถ้าอนิเมชันไม่ทำงานก็ยังออกได้ */
+    if(go)   go.addEventListener('click', function(){
+      try{ sessionStorage.setItem('pgFrom', 'report'); }catch(e){}
+      var leave = function(){ location.href = 'index.html'; };
+      var still = false;
+      try{
+        still = !!(window.matchMedia &&
+                   window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      }catch(e){}
+      if(still){ leave(); return; }
+      document.documentElement.classList.add('pg-leaving');
+      document.body.classList.add('pg-leaving');
+      setTimeout(leave, 360);
+    });
     if(box)  box.addEventListener('click', function(e){
       if(e.target === box){ closeLeave(); }   /* แตะพื้นที่มืดรอบ ๆ = อยู่ต่อ */
     });
     document.addEventListener('keydown', function(e){
       if(e.key === 'Escape' && box && box.style.display === 'flex'){ closeLeave(); }
     });
+  })();
+
+  /* ---- แถบแจ้งสถานะ ----
+     ทั่วทั้งไฟล์ยังสั่งงานด้วย $('statusChip').textContent = '...' เหมือนเดิมทุกจุด
+     ตัวนี้ทำหน้าที่คอยดูว่าข้อความถูกเปลี่ยนเมื่อไร แล้วเด้งแถบขึ้นให้เอง
+     ทำแบบนี้เพื่อไม่ต้องไล่แก้จุดที่เรียกใช้ทั้งยี่สิบกว่าจุด และจุดใหม่ในอนาคต
+     ก็จะเด้งเองโดยไม่ต้องจำว่าต้องสั่งเปิดแถบด้วย */
+  (function(){
+    var bar  = document.getElementById('statusBar');
+    var chip = document.getElementById('statusChip');
+    var xBtn = document.getElementById('statusX');
+    if(!bar || !chip || !window.MutationObserver) return;
+
+    var HOLD  = 4500;   /* ค้างบนจอกี่มิลลิวินาทีก่อนจางหาย */
+    var FADE  = 240;    /* ต้องเท่ากับเวลาในอนิเมชัน stOut */
+    /* ตอนเปิดแอปยังมีหน้าเปิดแอปบังอยู่สามวินาที ข้อความช่วงนั้นไม่มีใครเห็น
+       จึงเงียบไว้ก่อน ไม่งั้นแถบจะเด้งทิ้งไว้หลังฉากเปล่า ๆ */
+    var quietUntil = Date.now() + 3600;
+    var hideT = null, offT = null;
+
+    function hide(){
+      clearTimeout(hideT); clearTimeout(offT);
+      if(bar.hidden) return;
+      bar.classList.add('out');
+      offT = setTimeout(function(){
+        bar.hidden = true; bar.classList.remove('out');
+      }, FADE);
+    }
+    function show(){
+      clearTimeout(hideT); clearTimeout(offT);
+      bar.classList.remove('out');
+      bar.hidden = false;
+      hideT = setTimeout(hide, HOLD);
+    }
+
+    if(xBtn) xBtn.addEventListener('click', hide);
+
+    new MutationObserver(function(){
+      if(Date.now() < quietUntil) return;
+      show();
+    }).observe(chip, { childList:true, characterData:true, subtree:true });
   })();
 
   /* ---- เมนู ⋯ ---- */
