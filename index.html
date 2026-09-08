@@ -1913,6 +1913,10 @@
     padding-top:env(safe-area-inset-top,0px);
     opacity:1;transition:opacity .34s ease;
   }
+  /* ต้องเขียนบรรทัดนี้ไว้ด้วยเสมอ ห้ามลบ
+     display:flex ข้างบนเป็นสไตล์ของหน้าเว็บ ซึ่งชนะ hidden ที่เป็นค่าของเบราว์เซอร์
+     ถ้าไม่มีบรรทัดนี้ ม่านจะกางค้างทับทั้งหน้าตลอดเวลา กดอะไรไม่ได้เลย */
+  .bk-scr[hidden]{display:none;}
   .bk-scr.off{opacity:0;pointer-events:none;}
   .bk-mid{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px 18px;}
   .bk-art{position:relative;width:112px;height:112px;}
