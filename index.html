@@ -1902,23 +1902,64 @@
     .lh-cell:last-child{border-bottom:none;}
   }
 
-  /* ---- อนิเมชันย้ายหน้า แบบ A · ครึ่งขาเข้า ----
-     ต่อจากหน้ารายงานที่เลื่อนออกทางขวา หน้านี้เลื่อนเข้ามาจากทางซ้าย
-     เล่นเฉพาะตอนกลับมาจากหน้ารายงานเท่านั้น เข้าแอปตามปกติจะไม่ขยับ */
-  @keyframes pgInLeft{
-    from{ transform:translateX(-24%); }
-    to  { transform:translateX(0); }
+  /* ---- ม่านคั่นตอนกลับมาจากหน้ารายงาน ----
+     หน้ารายงานปิดฉากด้วยภาพตารางสี่ช่องบนพื้นกรมท่า ม่านนี้เปิดมาที่ภาพเดียวกันเป๊ะ
+     ค้างไว้แวบหนึ่งแล้วจางออกให้เห็นหน้าเมนูจริง ภาพจึงต่อกันสนิทข้ามสองไฟล์
+     และไม่เห็นรอยขาววาบตอนเบราว์เซอร์สลับหน้า
+     ปกติถูกซ่อนไว้ เข้าแอปตามปกติจะไม่เห็นม่านนี้เลย */
+  .bk-scr{
+    position:fixed;inset:0;z-index:9998;background:var(--navy);
+    display:flex;align-items:center;justify-content:center;
+    padding-top:env(safe-area-inset-top,0px);
+    opacity:1;transition:opacity .34s ease;
   }
-  body.pg-entering .scr.on{
-    animation:pgInLeft .34s cubic-bezier(.4,0,.2,1) both;
+  .bk-scr.off{opacity:0;pointer-events:none;}
+  .bk-mid{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px 18px;}
+  .bk-art{position:relative;width:112px;height:112px;}
+  /* ตารางอยู่ในตำแหน่งจบพอดี ไม่ต้องเล่นอนิเมชันซ้ำ เพราะหน้าก่อนเล่นมาให้แล้ว */
+  .bk-grid{
+    position:absolute;inset:18px;display:grid;grid-template-columns:1fr 1fr;gap:9px;
   }
+  .bk-grid i{background:rgba(255,255,255,.88);border-radius:6px;display:block;}
+  .bk-lead{color:rgba(255,255,255,.72);font-size:13.5px;}
+  .bk-tail{color:rgba(255,255,255,.45);font-size:12.5px;}
   @media (prefers-reduced-motion:reduce){
-    body.pg-entering .scr.on{ animation:none; }
+    .bk-scr{transition:none;}
   }
 
 </style>
 </head>
 <body>
+
+<!-- ============ ม่านคั่นตอนกลับมาจากหน้ารายงาน ============
+     ต้องอยู่บนสุดของหน้าและตัดสินใจตั้งแต่ตอนอ่านโค้ด ไม่ใช่รอตอนบูตท้ายไฟล์
+     ไม่งั้นหน้าเมนูจะแวบขึ้นมาก่อนแล้วค่อยมีม่านมาปิด ซึ่งเห็นเป็นการกระตุก -->
+<div class="bk-scr" id="backScr" aria-hidden="true" hidden>
+  <div class="bk-mid">
+    <div class="bk-art">
+      <div class="bk-grid"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="bk-lead">กำลังกลับไปหน้าเมนู</div>
+    <div class="bk-tail">เก็บฉบับร่างไว้ให้แล้ว</div>
+  </div>
+</div>
+<script>
+/* ธงถูกตั้งโดยหน้ารายงานตอนกดยืนยันออก ใช้ครั้งเดียวแล้วลบทิ้งทันที
+   เข้าแอปตามปกติหรือกดรีเฟรชจะไม่มีธง ม่านจึงไม่ขึ้นมาคั่น */
+(function(){
+  var from = null;
+  try{
+    from = sessionStorage.getItem('pgFrom');
+    sessionStorage.removeItem('pgFrom');
+  }catch(e){}
+  if(from !== 'report') return;
+  var scr = document.getElementById('backScr');
+  if(!scr) return;
+  scr.hidden = false;
+  setTimeout(function(){ scr.classList.add('off'); }, 200);
+  setTimeout(function(){ scr.hidden = true; }, 600);
+})();
+</script>
 
 <!-- ============ หน้าเข้าใช้งาน ============ -->
 <div class="scr" id="authScreen">
@@ -9058,21 +9099,6 @@
   /* ประตูเข้าใช้งานต้องขึ้นเสมอ ต่อให้ขั้นตอนก่อนหน้าพัง
      ไม่งั้นฟอร์มจะโผล่มาทั้งที่ยังไม่ได้ล็อกอิน */
   try{ bootAuth(); }catch(e){ console.error('bootAuth', e); showScreen('auth'); }
-
-  /* ---- อนิเมชันย้ายหน้า แบบ A · ครึ่งขาเข้า ----
-     หน้ารายงานตั้งธงไว้ก่อนเปลี่ยนหน้า ธงนี้ใช้ครั้งเดียวแล้วลบทิ้งทันที
-     ต้องเรียกหลัง bootAuth เพราะตอนนั้นหน้าที่จะโชว์ถึงจะมีคลาส on แล้ว
-     ถอดคลาสออกเมื่อเล่นจบ จะได้ไม่มี transform ค้างไว้บนหน้าจอ */
-  (function(){
-    var from = null;
-    try{
-      from = sessionStorage.getItem('pgFrom');
-      sessionStorage.removeItem('pgFrom');
-    }catch(e){}
-    if(from !== 'report') return;
-    document.body.classList.add('pg-entering');
-    setTimeout(function(){ document.body.classList.remove('pg-entering'); }, 460);
-  })();
 })();
 
 </script>
