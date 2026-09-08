@@ -1582,22 +1582,79 @@
     .lh-cell:last-child{border-bottom:none;}
   }
 
-  /* ---- อนิเมชันย้ายหน้า แบบ A · ครึ่งขาออก ----
-     กดยืนยันออก หน้ารายงานทั้งหน้าเลื่อนออกไปทางขวา
-     แล้วค่อยเปลี่ยนไป index.html ซึ่งจะเลื่อนเข้าจากทางซ้ายรับต่อ
-     ใส่ overflow:hidden ที่ html กันแถบเลื่อนแนวนอนโผล่ตอนหน้ากำลังเลื่อน */
-  body.pg-leaving{
-    transform:translateX(100%);
-    transition:transform .34s cubic-bezier(.4,0,.2,1);
+  /* ---- ม่านคั่นตอนกลับไปหน้าเมนู ----
+     ใช้ภาษาภาพชุดเดียวกับตอนกดเข้าแอป คือม่านกรมท่า โลโก้ และสายฟ้าโคจร
+     ต่างกันตรงที่ขาเข้าสายฟ้าวิ่งเข้าหาวง ขากลับมันวิ่งออกแล้วจางไป
+     ม่านผืนเดียวกันนี้ถูกวาดต่อที่ index.html ด้วย ภาพจึงต่อกันสนิท
+     ไม่เห็นรอยขาววาบตอนเบราว์เซอร์สลับหน้า */
+  .bk-scr{
+    position:fixed;inset:0;z-index:9998;background:var(--navy);
+    display:flex;align-items:center;justify-content:center;
+    padding-top:env(safe-area-inset-top,0px);
+    opacity:0;transition:opacity .2s ease;
   }
-  html.pg-leaving{ overflow:hidden; }
+  .bk-scr.on{opacity:1;}
+  .bk-mid{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px 18px;}
+  /* ต้องมีระยะมองสามมิติที่ตัวแม่ ไม่งั้น rotateY จะแบนจนดูเหมือนแค่ย่อส่วนเฉย ๆ */
+  .bk-art{position:relative;width:112px;height:112px;perspective:560px;}
+  .bk-form{position:absolute;inset:0;transform-origin:50% 50%;}
+  .bk-scr.on .bk-form{animation:bkFold .82s cubic-bezier(.5,0,.35,1) .06s both;}
+  .bk-board{
+    position:absolute;left:16px;top:6px;width:80px;height:98px;
+    background:#F3F4FA;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.34);
+  }
+  .bk-clip{position:absolute;left:44px;top:0;width:28px;height:11px;background:#8E97AE;border-radius:3px;}
+  /* ใช้คลาสบอกตำแหน่งทีละบรรทัด ไม่ใช้ nth-of-type เพราะมันนับตาม div ทั้งหมด
+     จะไปโดนแผ่นกระดานกับคลิปหนีบเข้าด้วย */
+  .bk-row{position:absolute;left:25px;width:62px;height:4px;background:#C9CEE0;border-radius:2px;}
+  .bk-r1{top:30px;} .bk-r2{top:54px;} .bk-r3{top:78px;}
+  /* ตารางสี่ช่อง คือหน้าเมนูปลายทาง โผล่หลังฟอร์มพับหุบหายไปแล้ว */
+  .bk-grid{
+    position:absolute;inset:18px;display:grid;grid-template-columns:1fr 1fr;gap:9px;opacity:0;
+  }
+  .bk-scr.on .bk-grid{animation:bkGrid .5s cubic-bezier(.2,.9,.3,1.15) .5s both;}
+  .bk-grid i{background:rgba(255,255,255,.88);border-radius:6px;display:block;}
+  @keyframes bkFold{
+    0%,10%  { transform:scale(1) rotateY(0deg);opacity:1; }
+    62%     { transform:scale(.34) rotateY(-58deg);opacity:.28; }
+    78%,100%{ transform:scale(.2) rotateY(-70deg);opacity:0; }
+  }
+  @keyframes bkGrid{
+    from{ opacity:0;transform:scale(.55); }
+    to  { opacity:1;transform:scale(1); }
+  }
+  .bk-lead{color:rgba(255,255,255,.72);font-size:13.5px;}
+  .bk-tail{color:rgba(255,255,255,.45);font-size:12.5px;}
   @media (prefers-reduced-motion:reduce){
-    body.pg-leaving{ transition:none;transform:none; }
+    .bk-scr{transition:none;}
+    .bk-scr.on .bk-form,.bk-scr.on .bk-grid{animation:none;}
+    .bk-form{opacity:0;}
+    .bk-grid{opacity:1;}
   }
 
 </style>
 </head>
 <body>
+<!-- ============ ม่านคั่นตอนกลับไปหน้าเมนู ============
+     ซ่อนอยู่ตลอด เปิดเฉพาะตอนกดยืนยันออกจากหน้ารายงาน
+     หน้าเมนูมีม่านหน้าตาเดียวกันรออยู่ พอเปลี่ยนหน้าภาพจึงต่อกันเนียน -->
+<div class="bk-scr" id="backScr" aria-hidden="true" hidden>
+  <div class="bk-mid">
+    <div class="bk-art">
+      <div class="bk-form">
+        <div class="bk-board"></div>
+        <div class="bk-clip"></div>
+        <div class="bk-row bk-r1"></div>
+        <div class="bk-row bk-r2"></div>
+        <div class="bk-row bk-r3"></div>
+      </div>
+      <div class="bk-grid"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="bk-lead">กำลังกลับไปหน้าเมนู</div>
+    <div class="bk-tail">เก็บฉบับร่างไว้ให้แล้ว</div>
+  </div>
+</div>
+
 <!-- ============ หน้าเปิดแอป ============
      สายฟ้าโคจรรอบวงแล้วดิ่งเข้าที่กลางวง จบแล้วจางหายไปเอง
      แสดงตอนเปิดแอปเท่านั้น ปิดตัวเองอัตโนมัติ ไม่ต้องกดอะไร -->
@@ -2652,21 +2709,28 @@
 
     b.addEventListener('click', openLeave);
     if(stay) stay.addEventListener('click', closeLeave);
-    /* ยืนยันออก: เลื่อนหน้าออกทางขวาก่อน แล้วค่อยเปลี่ยนหน้า
-       ธง pgFrom บอกหน้าเมนูให้เล่นครึ่งขาเข้าต่อ เข้าแอปตามปกติจะไม่มีธงนี้
+    /* ยืนยันออก: ปิดม่านทับหน้ารายงานก่อน แล้วค่อยเปลี่ยนหน้า
+       ธง pgFrom บอกหน้าเมนูให้เปิดม่านผืนเดียวกันรับต่อทันทีที่โหลด
+       เข้าแอปตามปกติจะไม่มีธงนี้ หน้าเมนูจึงขึ้นมาตรง ๆ ไม่มีม่านมาคั่น
        ตัวจับเวลาเป็นตัวสั่งเปลี่ยนหน้าเสมอ ถ้าอนิเมชันไม่ทำงานก็ยังออกได้ */
     if(go)   go.addEventListener('click', function(){
       try{ sessionStorage.setItem('pgFrom', 'report'); }catch(e){}
       var leave = function(){ location.href = 'index.html'; };
+      var scr   = document.getElementById('backScr');
       var still = false;
       try{
         still = !!(window.matchMedia &&
                    window.matchMedia('(prefers-reduced-motion: reduce)').matches);
       }catch(e){}
-      if(still){ leave(); return; }
-      document.documentElement.classList.add('pg-leaving');
-      document.body.classList.add('pg-leaving');
-      setTimeout(leave, 360);
+      if(!scr || still){ leave(); return; }
+      closeLeave();
+      scr.hidden = false;
+      /* ต้องข้ามไปอีกเฟรมก่อนใส่คลาส ไม่งั้นเบราว์เซอร์รวบสองสถานะเป็นครั้งเดียว
+         ม่านจะโผล่พรึ่บโดยไม่มีการค่อย ๆ จางเข้า */
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ scr.classList.add('on'); });
+      });
+      setTimeout(leave, 1120);   /* ฟอร์มพับจบที่ 0.88 วิ ตารางขึ้นครบที่ 1.0 วิ */
     });
     if(box)  box.addEventListener('click', function(e){
       if(e.target === box){ closeLeave(); }   /* แตะพื้นที่มืดรอบ ๆ = อยู่ต่อ */
